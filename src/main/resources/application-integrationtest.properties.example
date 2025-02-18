@@ -1,0 +1,6 @@
+# Use in-memory H2 database for tests
+spring.datasource.test.url=
+spring.datasource.test.diver-class-name=
+spring.datasource.test.username=
+spring.datasource.test.password=
+spring.jpa.test.hibernate.ddl-auto=
