@@ -5,6 +5,10 @@ import id.my.cupcakez.booktify.domain.auth.service.IAuthService;
 import id.my.cupcakez.booktify.dto.request.UserLoginRequest;
 import id.my.cupcakez.booktify.dto.request.UserRegisterRequest;
 import id.my.cupcakez.booktify.dto.response.UserResponse;
+import io.swagger.v3.oas.annotations.StringToClassMapItem;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +35,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @ApiResponse(responseCode = "200", description = "Login Success",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            type = "object",
+                            example = "{\n  \"message\": \"Login success\",\n  \"token\": \"xxxxxxxxxxxxxxxxxxxx\" \n}"
+                    )
+            )
+    )
     public ResponseEntity<?> login(
             @Validated
             @RequestBody
             UserLoginRequest userLoginRequest
+
     ) {
         String token = authService.login(userLoginRequest);
 
@@ -46,6 +60,26 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @ApiResponse(
+            responseCode = "200",
+            description = "Register Success",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            type = "object",
+                            properties = {
+                                    @StringToClassMapItem(
+                                            key = "message",
+                                            value = String.class
+                                    ),
+                                    @StringToClassMapItem(
+                                            key = "user",
+                                            value = UserResponse.class
+                                    )
+                            }
+                    )
+            )
+    )
     @PostMapping("/register")
     public ResponseEntity<?> register(
             @Validated

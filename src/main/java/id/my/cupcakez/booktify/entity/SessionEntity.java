@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,15 +14,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sessions")
-public class SessionEntity {
+@Table( name = "sessions",
+        indexes = {
+            @Index(columnList = "session_id")
+})
+public class SessionEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID sessionId;
 
-    @JoinColumn(name = "user_id", table = "users")
-    @Column(nullable = false)
-    private UUID userId;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private UserEntity user;
 
     @Column(nullable = false)
     private String refreshToken;

@@ -1,7 +1,9 @@
 package id.my.cupcakez.booktify.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +17,13 @@ import java.io.Serializable;
 @Builder
 public class CreateRentRequest implements Serializable {
     @JsonProperty("bookId")
-    @NotBlank(message = "bookId must not be blank")
+    @NotNull(message = "bookId must not be null")
+    @Min(value = 1, message = "bookId must be greater than 0")
     private Long bookId;
 
     @JsonProperty("quantity")
-    @NotBlank(message = "quantity must not be blank")
+    @NotNull(message = "quantity must not be null")
+    @Min(value = 1, message = "quantity must be greater than 0")
     private Integer quantity;
 
     @JsonProperty("rentedUntil")

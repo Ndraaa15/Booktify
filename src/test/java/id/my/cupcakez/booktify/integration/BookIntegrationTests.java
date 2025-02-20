@@ -1,19 +1,13 @@
 package id.my.cupcakez.booktify.integration;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
-import id.my.cupcakez.booktify.domain.book.service.BookService;
-import id.my.cupcakez.booktify.domain.book.service.IBookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,14 +17,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockMvcClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -124,6 +116,14 @@ public class BookIntegrationTests {
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         assertThat(bookResponses).isNotEmpty();
+        assertThat(bookResponses).hasSize(1);
+        assertThat(bookResponses[0]).extracting(
+                BookResponse::getTitle,
+                BookResponse::getAuthor,
+                BookResponse::getDescription,
+                BookResponse::getStock,
+                BookResponse::getImage
+        ).containsExactly(dataCreateRequest.getTitle(), dataCreateRequest.getAuthor(), dataCreateRequest.getDescription(), dataCreateRequest.getStock(), dataCreateRequest.getImage());
     }
 
     @Test
@@ -155,4 +155,18 @@ public class BookIntegrationTests {
 
         assertEquals(response.getStatusCode(), HttpStatus.NO_CONTENT);
     }
+
+
+
+    @Test
+    @DisplayName("Test 6: Get Book By Id Not Found Test")
+    @Order(6)
+    public void testGetBookByIdNotFound() throws JsonProcessingException {
+        try {
+            restTemplate.exchange("/api/v1/books/1", HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
+        } catch (HttpClientErrorException e) {
+            assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

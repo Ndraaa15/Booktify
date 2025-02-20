@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+<Properties>
+    <Property name="basePath">C:\Users\indra\Documents\Developments\Java\booktify\src\main\resources\logs</Property>
+</Properties>
+
+<Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+        <PatternLayout
+                pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1}}{bright,yellow}: %msg%n%throwable"
+        />
+    </Console>
+    <RollingFile name="fileLogger"
+                 fileName="${basePath}/app.log"
+                 filePattern="${basePath}/app-%d{yyyy-MM-dd}.log">
+        <PatternLayout>
+            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n
+            </pattern>
+        </PatternLayout>
+        <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            <SizeBasedTriggeringPolicy size="10MB" />
+        </Policies>
+        <DefaultRolloverStrategy max="10">
+            <Delete basePath="${basePath}" maxDepth="10">
+                <IfLastModified age="30d" />
+            </Delete>
+        </DefaultRolloverStrategy>
+    </RollingFile>
+</Appenders>
+<Loggers>
+    <Root level="info" additivity="false">
+        <AppenderRef ref="fileLogger" />
+        <AppenderRef ref="Console" />
+    </Root>
+</Loggers>
+</Configuration>

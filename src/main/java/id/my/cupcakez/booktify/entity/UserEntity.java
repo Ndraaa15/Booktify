@@ -1,5 +1,6 @@
 package id.my.cupcakez.booktify.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import id.my.cupcakez.booktify.constant.UserRole;
 import id.my.cupcakez.booktify.constant.UserRoleConverter;
 import jakarta.persistence.*;
@@ -11,7 +12,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -22,13 +25,13 @@ import java.util.UUID;
 @Table(
         name = "users",
         uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "phone")
+                @UniqueConstraint(columnNames = "email"),
+                @UniqueConstraint(columnNames = "phone")
         }, indexes = {
         @Index(columnList = "email"),
         @Index(columnList = "id")
 })
-public class UserEntity {
+public class UserEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

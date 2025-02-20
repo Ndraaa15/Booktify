@@ -7,13 +7,14 @@ import id.my.cupcakez.booktify.dto.response.BookResponse;
 import id.my.cupcakez.booktify.dto.response.RentResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.querydsl.core.types.Predicate;
 
 public interface IBookService {
     BookResponse createBook(CreateBookRequest createBookRequest);
 
     BookResponse getBookById(Long id);
 
-    Page<BookResponse> getBooks(Pageable pageable);
+    Page<BookResponse> getBooks(Predicate predicate, Pageable pageable);
 
     BookResponse updateBook(Long id, UpdateBookRequest updateBookRequest);
 

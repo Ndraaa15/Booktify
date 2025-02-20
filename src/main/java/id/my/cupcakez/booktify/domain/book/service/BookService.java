@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import com.querydsl.core.types.Predicate;
 
 import java.util.Optional;
 
@@ -65,8 +66,8 @@ public class BookService implements IBookService {
 
     @Override
     @Cacheable(value = "books", key = "'books-page-' + #pageable.pageNumber")
-    public Page<BookResponse> getBooks(Pageable pageable) {
-        Page<BookResponse> bookResponse = bookRepository.findAll(pageable).map(bookMapper::toBookResponse);
+    public Page<BookResponse> getBooks(Predicate predicate, Pageable pageable) {
+        Page<BookResponse> bookResponse = bookRepository.findAll(predicate, pageable).map(bookMapper::toBookResponse);
         logger.debug("Books found: {}", new PagedModel<>(bookResponse).getContent());
         return bookResponse;
     }

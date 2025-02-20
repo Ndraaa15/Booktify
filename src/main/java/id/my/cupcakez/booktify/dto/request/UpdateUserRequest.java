@@ -21,10 +21,10 @@ public class UpdateUserRequest implements Serializable {
     @Email(message = "email must be valid")
     private String email;
 
-    @JsonProperty("password")
+    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @JsonProperty("confirmPassword")
+    @JsonProperty(value = "confirmPassword", access = JsonProperty.Access.WRITE_ONLY)
     private String confirmPassword;
 
     @JsonProperty("phone")

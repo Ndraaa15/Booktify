@@ -1,6 +1,7 @@
 package id.my.cupcakez.booktify.exception;
 
 
+import org.hibernate.exception.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -17,31 +18,42 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
-        log.error("Custom exception occurred: {}", ex.getMessage());
+        log.error("error occurred: {}", ex.getMessage());
         return buildErrorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> validationErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                validationErrors.put(error.getField(), error.getDefaultMessage()));
-        log.error("Validation failed: {}", validationErrors);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors);
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(
+                        error -> validationErrors.put(error.getField(), error.getDefaultMessage())
+                );
+        log.error("validation for {} failed caused by {}", ex.getBindingResult().getTarget().getClass(), validationErrors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "validation failed", validationErrors);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-        log.error("An unexpected error occurred: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", ex.getMessage());
+        log.error("an unexpected error occurred caused by {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected error", ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        log.error("Data integrity violation: {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.CONFLICT, "Data integrity violation", ex.getMessage());
-    }
+    public ResponseEntity<Map<String, Object>> handleConstraintViolationException(DataIntegrityViolationException ex) {
+        if (!(ex.getCause() instanceof ConstraintViolationException constraintViolationException)) {
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected error", ex.getMessage());
+        }
 
+        String details = "";
+        if (constraintViolationException.getSQLState().equals("23505")) {
+            details = String.format("duplicate key for %s", constraintViolationException.getConstraintName());
+        }
+
+        log.error("constraint violation error for {} caused by {}", constraintViolationException.getConstraintName(), constraintViolationException.getErrorMessage());
+        return buildErrorResponse(HttpStatus.CONFLICT, "constraint violation error", details);
+    }
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String message) {
         return buildErrorResponse(status, message, null);

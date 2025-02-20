@@ -38,24 +38,28 @@ public class AuthService implements IAuthService {
         this.jwt = jwt;
     }
 
-    public String login(UserLoginRequest userLoginRequest) {
+    public String login(
+            UserLoginRequest userLoginRequest
+    ) {
         Optional<UserEntity> userEntity = authRepository.findByEmail(userLoginRequest.getEmail());
 
         return userEntity.map(u -> {
             if (bCryptPasswordEncoder.matches(userLoginRequest.getPassword(), u.getPassword())) {
-                logger.debug("User logged in: {}", u);
+                logger.info("user with email {} successfuly login:", u.getEmail());
                 return jwt.generateToken(u);
             } else {
-                throw new CustomException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+                throw new CustomException("invalid email or password", HttpStatus.UNAUTHORIZED);
             }
         }).orElseThrow(
-                () -> new CustomException("User not found", HttpStatus.NOT_FOUND)
+                () -> new CustomException("user not found", HttpStatus.NOT_FOUND)
         );
     }
 
-    public UserResponse register(UserRegisterRequest userRegisterRequest) {
+    public UserResponse register(
+            UserRegisterRequest userRegisterRequest
+    ) {
         if (!userRegisterRequest.getPassword().equals(userRegisterRequest.getConfirmPassword())) {
-            throw new CustomException("Password and confirm password must be the same", HttpStatus.BAD_REQUEST);
+            throw new CustomException("password and confirm password must be the same", HttpStatus.BAD_REQUEST);
         }
 
         String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
@@ -75,7 +79,7 @@ public class AuthService implements IAuthService {
 
         UserEntity user = authRepository.save(userData);
 
-        logger.debug("User created: {}", user);
+        logger.debug("user with email {} successfuly created", user.getEmail());
 
         return userMapper.toUserResponse(user);
     }

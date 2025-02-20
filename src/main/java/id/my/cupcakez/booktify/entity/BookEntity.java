@@ -18,10 +18,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "books", indexes = {
-        @Index(columnList = "id"),
-        @Index(columnList = "title"),
-        @Index(columnList = "author")
+@Table( name = "books",
+        indexes = {
+                @Index(columnList = "id"),
+                @Index(columnList = "title"),
+                @Index(columnList = "author")
 })
 public class BookEntity implements Serializable {
     @Id

@@ -55,7 +55,7 @@ public class Jwt implements IJwt {
                 .getPayload();
 
         String roleString = claims.get("role", String.class);
-        UserRole role = UserRole.valueOf(roleString);
+        UserRole role = UserRole.fromValue(roleString);
 
         List<SimpleGrantedAuthority> roles;
         if (roleString == null) {

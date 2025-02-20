@@ -2,16 +2,17 @@ package id.my.cupcakez.booktify.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.my.cupcakez.booktify.domain.book.controller.BookController;
+import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
 import id.my.cupcakez.booktify.domain.book.service.BookService;
 import id.my.cupcakez.booktify.domain.book.service.IBookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,9 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import java.util.List;
-
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(BookController.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ContextConfiguration(classes = {BookController.class})
+//@ContextConfiguration(classes = {BookController.class, IBookRepository.class, IBookService.class})
 public class BookControllerTests {
     @Autowired
     private MockMvc mockMvc;
@@ -111,6 +110,8 @@ public class BookControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.book.stock").value(dataResponse.getStock())
         );
+
+        verify(bookService, times(1)).createBook(any(CreateBookRequest.class));
     }
 
     @Test
@@ -119,7 +120,7 @@ public class BookControllerTests {
     public void testGetBooks() throws Exception {
         // given
         Page<BookResponse> bookResponses = new PageImpl<>(List.of(dataResponse));
-        given(bookService.getBooks(any())).willReturn(bookResponses);
+        given(bookService.getBooks(any(), any())).willReturn(bookResponses);
 
         // then
         mockMvc.perform(
@@ -139,6 +140,8 @@ public class BookControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.books.content[0].stock").value(dataResponse.getStock())
         );
+
+        verify(bookService, times(1)).getBooks(any(), any());
     }
 
     @Test
@@ -166,6 +169,8 @@ public class BookControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.book.stock").value(dataResponse.getStock())
         );
+
+        verify(bookService, times(1)).getBookById(1L);
     }
 
     @Test
@@ -196,6 +201,8 @@ public class BookControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.book.stock").value(dataUpdateResponse.getStock())
         );
+
+        verify(bookService, times(1)).updateBook(1L, dataUpdateRequest);
     }
 
     @Test
@@ -210,6 +217,7 @@ public class BookControllerTests {
         ).andExpect(
                 MockMvcResultMatchers.status().isNoContent()
         );
-    }
 
+        verify(bookService, times(1)).deleteBook(1L);
+    }
 }

@@ -1,6 +1,8 @@
 package id.my.cupcakez.booktify.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import id.my.cupcakez.booktify.constant.StatusRent;
+import jakarta.validation.Constraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +16,5 @@ import java.io.Serializable;
 @Builder
 public class UpdateRentRequest implements Serializable {
     @JsonProperty("status")
-    private String status;
+    private StatusRent status;
 }
