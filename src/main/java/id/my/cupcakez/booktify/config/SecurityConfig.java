@@ -41,10 +41,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").anonymous()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/v1/books/**").hasAnyAuthority("USER", "ADMIN", "STAFF")
-//                        .requestMatchers(HttpMethod.POST, "/api/v1/books").hasAnyAuthority("ADMIN", "STAFF")
-//                        .requestMatchers(HttpMethod.PUT, "/api/v1/books/**").hasAnyAuthority("ADMIN", "STAFF")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/v1/books/**").hasAnyAuthority("ADMIN", "STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/books/**").hasAnyAuthority("USER", "STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/books").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/books/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/books/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/rents/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/rents").hasAnyAuthority("USER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/rents/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/me").hasAnyAuthority("USER", "STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me").hasAnyAuthority("USER", "STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/me/rents").hasAnyAuthority("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAnyAuthority("STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/files/upload").hasAnyAuthority("STAFF")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -54,7 +64,7 @@ public class SecurityConfig {
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(10);
     }
 
     @Bean

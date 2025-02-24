@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.StringToClassMapItem;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.servlet.http.HttpSession;
@@ -68,7 +70,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<ResponseWrapper<String>> logout(HttpSession session) {
+        // Todo : delete sessions in table
+
         session.invalidate();
         ResponseWrapper<String> response = ResponseWrapper.<String>builder()
                 .message("logout success")

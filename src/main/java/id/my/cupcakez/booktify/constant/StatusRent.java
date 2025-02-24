@@ -27,13 +27,22 @@ public enum StatusRent {
 
     @JsonCreator
     public static StatusRent fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
+
         for (StatusRent statusRent : values()) {
             String statusRentType = statusRent.getStatusRentType();
-            if (statusRentType.equals(value)) {
+            if (statusRentType.equalsIgnoreCase(value)) {
                 return statusRent;
-            }   
+            }
         }
 
         throw new CustomException(String.format("%s status rent enum, it's must be either pending, accepted, rejected, on-rent, returned, overdue", UNKNOWN.getStatusRentType()),  HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public String toString() {
+        return statusRent;
     }
 }

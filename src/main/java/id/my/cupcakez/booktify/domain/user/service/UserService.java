@@ -1,16 +1,15 @@
 package id.my.cupcakez.booktify.domain.user.service;
 
 import id.my.cupcakez.booktify.domain.rent.repository.IRentRepository;
+import id.my.cupcakez.booktify.domain.rent.repository.RentQueryFilter;
 import id.my.cupcakez.booktify.domain.user.repository.IUserRepository;
+import id.my.cupcakez.booktify.domain.user.repository.UserQueryFilter;
 import id.my.cupcakez.booktify.dto.request.UpdateUserProfileRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateUserRequest;
-import id.my.cupcakez.booktify.dto.response.RentResponse;
 import id.my.cupcakez.booktify.dto.response.UserRentResponse;
 import id.my.cupcakez.booktify.dto.response.UserResponse;
-import id.my.cupcakez.booktify.entity.RentEntity;
 import id.my.cupcakez.booktify.entity.UserEntity;
 import id.my.cupcakez.booktify.exception.CustomException;
-import id.my.cupcakez.booktify.util.mapper.IRentMapper;
 import id.my.cupcakez.booktify.util.mapper.IUserMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,47 +62,85 @@ public class UserService implements IUserService {
 
             UserEntity userSaved = userRepository.save(u);
 
-            logger.info("user with id {} successfully updated", userSaved.getId());
+            logger.info("User with id {} successfully updated", userSaved.getId());
 
             return userMapper.toUserResponse(userSaved);
         }).orElseThrow(
-                () -> new CustomException("user not found", HttpStatus.NOT_FOUND)
+                () -> new CustomException("User not found", HttpStatus.NOT_FOUND)
         );
     }
 
     @Override
     @Cacheable(value = "user", key = "'user-' + #userId")
-    public UserResponse getUserById(UUID userId) {
+    public UserResponse findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .map(userEntity -> {
-                    logger.info("user with id {} successfully found", userEntity.getId());
+                    logger.info("User with id {} successfully found", userEntity.getId());
                     return userMapper.toUserResponse(userEntity);
                 })
-                .orElseThrow(() -> new CustomException(String.format("user with id %s not found", userId), HttpStatus.NOT_FOUND)
+                .orElseThrow(() -> new CustomException(String.format("User with id %s not found", userId), HttpStatus.NOT_FOUND)
                 );
     }
 
     @Override
     @Cacheable(value = "user-rents", key = "'users-' + #userId + '-' + #pageable")
-    public Page<UserRentResponse> getUserRents(UUID userId, Pageable pageable) {
-        return userRepository.findRentsByUserId(userId, pageable)
-                .map(rentEntity -> {
-                    logger.info("rents for user with id {} successfully found", userId);
-                    return userMapper.toUserRentResponse(rentEntity);
-                });
+    public Page<UserRentResponse> findUserRents(UUID userId, RentQueryFilter rentQueryFilter) {
+        Page<UserRentResponse> userRents;
+
+        if (rentQueryFilter.getStatusRent() == null){
+            userRents = userRepository.findRentsByUserId(userId, rentQueryFilter.getKeyword(), rentQueryFilter.getPageable())
+                    .map(rentEntity -> {
+                        return userMapper.toUserRentResponse(rentEntity);
+                    });
+        }else {
+            userRents = userRepository.findRentsByUserId(userId, rentQueryFilter.getKeyword(), rentQueryFilter.getStatusRent(), rentQueryFilter.getPageable())
+                    .map(rentEntity -> {
+                        return userMapper.toUserRentResponse(rentEntity);
+                    });
+        }
+
+        logger.info("User rents for pages {} , size {}, sort {}, keyword {}, status {} successfully found",
+                rentQueryFilter.getPageable().getPageNumber(),
+                rentQueryFilter.getPageable().getPageSize(),
+                rentQueryFilter.getPageable().getSort(),
+                rentQueryFilter.getKeyword(),
+                rentQueryFilter.getStatusRent()
+        );
+
+        return userRents;
     }
 
     @Override
     @Cacheable(value = "users", key = "'users-' + #pageable")
-    public Page<UserResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(userEntity -> {
-                    logger.info("users for page {} successfully found", pageable.getPageNumber());
-                    return userMapper.toUserResponse(userEntity);
-                });
+    public Page<UserResponse> findUsers(UserQueryFilter userQueryFilter) {
+        Page<UserResponse> users;
+
+        if (userQueryFilter.getRole() == null){
+            users = userRepository.findAll(userQueryFilter.getKeyword(), userQueryFilter.getPageable())
+                    .map(userEntity -> {
+                        return userMapper.toUserResponse(userEntity);
+                    });
+
+        }else {
+            users = userRepository.findAll(userQueryFilter.getKeyword(), userQueryFilter.getRole(), userQueryFilter.getPageable())
+                    .map(userEntity -> {
+                        return userMapper.toUserResponse(userEntity);
+                    });
+        }
+
+        logger.info("Users for pages {} , size {}, sort {}, keyword {}, role {} successfully found",
+                userQueryFilter.getPageable().getPageNumber(),
+                userQueryFilter.getPageable().getPageSize(),
+                userQueryFilter.getPageable().getSort(),
+                userQueryFilter.getKeyword(),
+                userQueryFilter.getRole()
+        );
+
+        return users;
     }
 
     @Override
+    @CacheEvict(value = {"user", "users"}, allEntries = true)
     public UserResponse updateUserProfile(UUID userId, UpdateUserProfileRequest updateUserProfileRequest) {
         return userRepository.findById(userId).map(u -> {
             Optional.ofNullable(updateUserProfileRequest.getName()).ifPresent(u::setName);
@@ -121,12 +158,11 @@ public class UserService implements IUserService {
 
             UserEntity userSaved = userRepository.save(u);
 
-            logger.info("user profile with id {} successfully updated", userSaved.getId());
+            logger.info("User profile with id {} successfully updated", userSaved.getId());
 
             return userMapper.toUserResponse(userSaved);
         }).orElseThrow(
-                () -> new CustomException("user not found", HttpStatus.NOT_FOUND)
+                () -> new CustomException("User not found", HttpStatus.NOT_FOUND)
         );
     }
-
 }

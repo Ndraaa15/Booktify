@@ -1,6 +1,6 @@
 package id.my.cupcakez.booktify.unit;
 
-import com.querydsl.core.types.Predicate;
+import id.my.cupcakez.booktify.domain.book.repository.BookQueryFilter;
 import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
 import id.my.cupcakez.booktify.domain.book.service.BookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
@@ -110,12 +110,12 @@ public class BookServiceTests {
     @Test
     @DisplayName("Test 2:Get Book By Id Test")
     @Order(2)
-    public void testGetBookById(){
+    public void testFindBookById(){
         // given
         given(bookRepository.findById(1L)).willReturn(java.util.Optional.of(dataEntity));
 
         // when
-        BookResponse result = bookService.getBookById(1L);
+        BookResponse result = bookService.findBookById(1L);
 
         // then
         assertThat(result).isNotNull();
@@ -128,21 +128,22 @@ public class BookServiceTests {
     @Test
     @DisplayName("Test 3:Get Books Test")
     @Order(3)
-    public void testGetBooks(){
+    public void testFindBooks(){
         // given
         Page<BookEntity> bookEntities = new PageImpl<>(List.of(dataEntity));
-        Pageable pageable = Pageable.ofSize(20).withPage(0);
-        given(bookRepository.findAllByKeywords(eq(""), eq(pageable))).willReturn(bookEntities);
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
+        BookQueryFilter bookQueryFilter = new BookQueryFilter("", pageable);
+        given(bookRepository.findAll(eq(""), eq(pageable))).willReturn(bookEntities);
 
         // when
-        Page<BookResponse> bookResponses = bookService.getBooks("", pageable);
+        Page<BookResponse> bookResponses = bookService.findBooks(bookQueryFilter);
 
         // then
         assertThat(bookResponses).isNotNull();
         assertThat(bookResponses.getContent()).hasSize(1);
         assertThat(bookResponses.getContent().get(0)).usingRecursiveComparison().isEqualTo(dataCreateResponse);
 
-        verify(bookRepository, times(1)).findAllByKeywords(eq(""), eq(pageable));
+        verify(bookRepository, times(1)).findAll(eq(""), eq(pageable));
         verify(bookMapper, times(1)).toBookResponse(any(BookEntity.class));
     }
 

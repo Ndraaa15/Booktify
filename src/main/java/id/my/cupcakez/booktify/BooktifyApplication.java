@@ -1,15 +1,15 @@
 package id.my.cupcakez.booktify;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
@@ -21,10 +21,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 				license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")
 		)
 )
+@SecurityScheme(
+		name = "Bearer Authentication",
+		type = SecuritySchemeType.HTTP,
+		bearerFormat = "JWT",
+		scheme = "bearer"
+)
 @EnableCaching
 @EnableScheduling
 public class BooktifyApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(BooktifyApplication.class, args);
 	}

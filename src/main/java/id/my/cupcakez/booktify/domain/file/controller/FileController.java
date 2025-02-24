@@ -5,7 +5,9 @@ import id.my.cupcakez.booktify.domain.file.service.IFileService;
 import id.my.cupcakez.booktify.response.ResponseWrapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jdk.jfr.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,8 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    @PostMapping("/upload")
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseWrapper<String>> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
         String url = fileService.uploadFile(file.getOriginalFilename(), file);
 

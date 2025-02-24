@@ -151,7 +151,7 @@ public class RentIntegrationTests {
             statusCodes.add(status);
         }
 
-        BookResponse updatedBook = bookService.getBookById(bookId);
+        BookResponse updatedBook = bookService.findBookById(bookId);
         assertThat(updatedBook.getStock()).isEqualTo(0);
         assertThat(statusCodes).contains(201, 400);
     }

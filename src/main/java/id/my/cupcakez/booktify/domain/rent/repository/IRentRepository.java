@@ -23,6 +23,14 @@ public interface IRentRepository extends JpaRepository<RentEntity, Long> {
     @Transactional
     Integer updateOverdueRent(LocalDate now, StatusRent onRent, StatusRent overdue);
 
-    @Query("SELECT r FROM RentEntity r WHERE r.user.name = %:keyword% OR r.user.email = %:keyword% OR r.book.title = %:keyword%")
-    Page<RentEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT r FROM RentEntity r WHERE (LOWER(r.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.book.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:status IS NULL OR r.status = :status)")
+    Page<RentEntity> findAll(@Param("keyword") String keyword, @Param("status") StatusRent statusRent, Pageable pageable);
+
+    @Query("SELECT r FROM RentEntity r WHERE (LOWER(r.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(r.book.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<RentEntity> findAll(String keyword, Pageable pageable);
 }

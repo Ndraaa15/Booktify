@@ -47,8 +47,7 @@ public class AuthService implements IAuthService {
         Optional<UserEntity> userEntity = authRepository.findByEmail(userLoginRequest.getEmail());
         return userEntity.map(u -> {
             if (bCryptPasswordEncoder.matches(userLoginRequest.getPassword(), u.getPassword())) {
-                logger.info("user with email {} successfuly login", u.getEmail());
-
+                logger.info("User with email {} successfuly login", u.getEmail());
                 LoginResponse loginResponse = LoginResponse.builder()
                         .email(u.getEmail())
                         .role(u.getRole())
@@ -56,10 +55,10 @@ public class AuthService implements IAuthService {
                         .build();
                 return loginResponse;
             } else {
-                throw new CustomException("invalid email or password", HttpStatus.UNAUTHORIZED);
+                throw new CustomException("Invalid email or password", HttpStatus.UNAUTHORIZED);
             }
         }).orElseThrow(
-                () -> new CustomException("user not found", HttpStatus.NOT_FOUND)
+                () -> new CustomException("User not found", HttpStatus.NOT_FOUND)
         );
     }
 
@@ -69,12 +68,13 @@ public class AuthService implements IAuthService {
             UserRegisterRequest userRegisterRequest
     ) {
         if (!userRegisterRequest.getPassword().equals(userRegisterRequest.getConfirmPassword())) {
-            throw new CustomException("password and confirm password must be the same", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Password and confirm password must be the same", HttpStatus.BAD_REQUEST);
         }
 
+        // Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character
         String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
         if (!Pattern.matches(passwordPattern, userRegisterRequest.getPassword())) {
-            throw new CustomException("password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character", HttpStatus.BAD_REQUEST);
+            throw new CustomException("Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character", HttpStatus.BAD_REQUEST);
         }
 
         UserEntity userData = UserEntity
@@ -89,7 +89,7 @@ public class AuthService implements IAuthService {
 
         UserEntity user = authRepository.save(userData);
 
-        logger.debug("user with email {} successfuly created", user.getEmail());
+        logger.info("User with email {} successfuly created", user.getEmail());
 
         return userMapper.toUserResponse(user);
     }

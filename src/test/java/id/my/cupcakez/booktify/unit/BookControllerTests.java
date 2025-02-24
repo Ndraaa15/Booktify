@@ -2,6 +2,7 @@ package id.my.cupcakez.booktify.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.my.cupcakez.booktify.domain.book.controller.BookController;
+import id.my.cupcakez.booktify.domain.book.repository.BookQueryFilter;
 import id.my.cupcakez.booktify.domain.book.service.BookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
@@ -122,10 +123,12 @@ public class BookControllerTests {
     public void testGetBooks() {
         // given
         Page<BookResponse> bookMockResponses = new PageImpl<>(List.of(dataResponse));
-        given(bookService.getBooks(eq(""), any())).willReturn(bookMockResponses);
+        Pageable pageable = Pageable.ofSize(20).withPage(0);;
+        BookQueryFilter bookQueryFilter = BookQueryFilter.builder().keyword("").pageable(pageable).build();
+        given(bookService.findBooks(bookQueryFilter)).willReturn(bookMockResponses);
 
         // when
-        ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> bookResponses = bookController.getBooks("", Pageable.unpaged());
+        ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> bookResponses = bookController.findBooks("", pageable);
 
         // then
         assertThat(bookResponses.getBody().getData().getContent()).hasSize(1);
@@ -144,7 +147,7 @@ public class BookControllerTests {
         );
 
 
-        verify(bookService, times(1)).getBooks(eq(""), any());
+        verify(bookService, times(1)).findBooks(bookQueryFilter);
     }
 
     @Test
@@ -152,10 +155,10 @@ public class BookControllerTests {
     @Order(3)
     public void testGetBookById() {
         // given
-        given(bookService.getBookById(1L)).willReturn(dataResponse);
+        given(bookService.findBookById(1L)).willReturn(dataResponse);
 
         // when
-        ResponseEntity<ResponseWrapper<BookResponse>> bookResponse = bookController.getBook(1L);
+        ResponseEntity<ResponseWrapper<BookResponse>> bookResponse = bookController.findBookById(1L);
 
         // then
         assertThat(bookResponse.getBody().getData()).extracting(
@@ -172,7 +175,7 @@ public class BookControllerTests {
                 dataResponse.getStock()
         );
 
-        verify(bookService, times(1)).getBookById(1L);
+        verify(bookService, times(1)).findBookById(1L);
     }
 
     @Test
@@ -224,17 +227,17 @@ public class BookControllerTests {
     @Order(6)
     public void testGetBookNotFound(){
         // given
-        given(bookService.getBookById(2L)).willThrow(new CustomException("Book not found", HttpStatus.NOT_FOUND));
+        given(bookService.findBookById(2L)).willThrow(new CustomException("Book not found", HttpStatus.NOT_FOUND));
 
         // when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            bookController.getBook(2L);
+            bookController.findBookById(2L);
         });
 
         // then
         assertEquals("Book not found", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
-        verify(bookService, times(1)).getBookById(2L);
+        verify(bookService, times(1)).findBookById(2L);
     }
 }

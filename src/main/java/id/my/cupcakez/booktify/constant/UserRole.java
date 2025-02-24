@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 
 public enum UserRole {
     UNKNOWN ("unknown"),
-    ADMIN ("admin"),
     STAFF ("staff"),
     USER ("user");
 

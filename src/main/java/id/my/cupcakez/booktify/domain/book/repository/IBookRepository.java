@@ -23,11 +23,10 @@ public interface IBookRepository extends
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<BookEntity> getBookByIdForUpdate(@Param("id") Long id);
 
-
     @Query(value = "SELECT * FROM books WHERE (:keyword IS NULL OR :keyword = '' OR tsv @@ plainto_tsquery(:keyword)) ORDER BY created_at ASC",
             countQuery = "SELECT count(*) FROM books WHERE (:keyword IS NULL OR :keyword = '' OR tsv @@ plainto_tsquery(:keyword))",
             nativeQuery = true)
-    Page<BookEntity> findAllByKeywords(@Param("keyword") String keyword, Pageable pageable);
+    Page<BookEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
 
 }
 

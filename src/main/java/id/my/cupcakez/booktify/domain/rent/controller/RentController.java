@@ -1,5 +1,7 @@
 package id.my.cupcakez.booktify.domain.rent.controller;
 
+import id.my.cupcakez.booktify.constant.StatusRent;
+import id.my.cupcakez.booktify.domain.rent.repository.RentQueryFilter;
 import id.my.cupcakez.booktify.domain.rent.service.IRentService;
 import id.my.cupcakez.booktify.dto.request.CreateRentRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateRentRequest;
@@ -15,13 +17,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.web.SecurityMarker;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -56,7 +56,7 @@ public class RentController {
             @PathVariable("id")
             Long id
     ){
-        RentResponse rentResponse = rentService.getRentById(id);
+        RentResponse rentResponse = rentService.findRentById(id);
         ResponseWrapper<RentResponse> response = new ResponseWrapper<>(
                 "Rent found successfully",
                 rentResponse
@@ -82,13 +82,22 @@ public class RentController {
 
     @GetMapping("")
     public ResponseEntity<ResponseWrapper<PagedModel<RentResponse>>> getRent(
+            @RequestParam(value = "keyword", required = false, defaultValue = "")
+            String keyword,
+            @RequestParam(value = "status", required = false, defaultValue = "")
+            StatusRent statusRent,
             @ParameterObject
-            @PageableDefault(sort = "created_at", direction = Sort.Direction.ASC)
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
             Pageable pageable
     ){
-        Page<RentResponse> rents = rentService.getRents(pageable);
+        RentQueryFilter rentQueryFilter = RentQueryFilter.builder()
+                .keyword(keyword)
+                .statusRent(statusRent)
+                .pageable(pageable)
+                .build();
+        Page<RentResponse> rents = rentService.findRents(rentQueryFilter);
         ResponseWrapper<PagedModel<RentResponse>> response = ResponseWrapper.<PagedModel<RentResponse>>builder()
-                .message("rents retrieved successfully")
+                .message("Rents retrieved successfully")
                 .data(new PagedModel<>(rents))
                 .build();
         return ResponseEntity.ok(response);

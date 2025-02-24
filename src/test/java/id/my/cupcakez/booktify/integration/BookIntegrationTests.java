@@ -3,12 +3,15 @@ package id.my.cupcakez.booktify.integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.my.cupcakez.booktify.constant.UserRole;
 import id.my.cupcakez.booktify.domain.auth.service.IAuthService;
+import id.my.cupcakez.booktify.domain.user.repository.IUserRepository;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UserLoginRequest;
 import id.my.cupcakez.booktify.dto.request.UserRegisterRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
+import id.my.cupcakez.booktify.entity.UserEntity;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -44,7 +48,6 @@ public class BookIntegrationTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     private static String token;
 
     private CreateBookRequest dataCreateRequest;
@@ -66,17 +69,17 @@ public class BookIntegrationTests {
 
 
     @BeforeAll
-    static void beforeAll(@Autowired IAuthService authService) {
-        UserRegisterRequest user = UserRegisterRequest.builder()
+    static void beforeAll(@Autowired IUserRepository userRepository, @Autowired IAuthService authService, @Autowired BCryptPasswordEncoder bCryptPasswordEncoder) {
+        UserEntity user = UserEntity.builder()
                 .name("John Doe")
                 .email("testuser@example.com")
-                .password("TestPassword123!")
-                .confirmPassword("TestPassword123!")
+                .password(bCryptPasswordEncoder.encode("TestPassword123!"))
+                .role(UserRole.STAFF)
                 .phone("+6281234567890")
                 .address("Jl. Raya Kuta No. 1")
                 .build();
 
-        authService.register(user);
+        userRepository.save(user);
 
         UserLoginRequest login = UserLoginRequest.builder()
                 .email("testuser@example.com")

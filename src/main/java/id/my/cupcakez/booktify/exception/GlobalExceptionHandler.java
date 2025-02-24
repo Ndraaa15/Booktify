@@ -18,7 +18,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
-        log.error("error occurred: {}", ex.getMessage());
+        log.error("Error occurred: {}", ex.getMessage());
         return buildErrorResponse(ex.getStatus(), ex.getMessage());
     }
 
@@ -30,29 +30,29 @@ public class GlobalExceptionHandler {
                 .forEach(
                         error -> validationErrors.put(error.getField(), error.getDefaultMessage())
                 );
-        log.error("validation for {} failed caused by {}", ex.getBindingResult().getTarget().getClass(), validationErrors);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "validation failed", validationErrors);
+        log.error("Validation for {} failed caused by {}", ex.getBindingResult().getTarget().getClass(), validationErrors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-        log.error("an unexpected error occurred caused by {}", ex.getMessage());
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected error", ex.getMessage());
+        log.error("An unexpected error occurred caused by {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraintViolationException(DataIntegrityViolationException ex) {
         if (!(ex.getCause() instanceof ConstraintViolationException constraintViolationException)) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected error", ex.getMessage());
+            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", ex.getMessage());
         }
 
         String details = "";
         if (constraintViolationException.getSQLState().equals("23505")) {
-            details = String.format("duplicate key for %s", constraintViolationException.getConstraintName());
+            details = String.format("Duplicate key for %s", constraintViolationException.getConstraintName());
         }
 
-        log.error("constraint violation error for {} caused by {}", constraintViolationException.getConstraintName(), constraintViolationException.getErrorMessage());
-        return buildErrorResponse(HttpStatus.CONFLICT, "constraint violation error", details);
+        log.error("Constraint violation error for {} caused by {}", constraintViolationException.getConstraintName(), constraintViolationException.getErrorMessage());
+        return buildErrorResponse(HttpStatus.CONFLICT, "Constraint violation error", details);
     }
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String message) {

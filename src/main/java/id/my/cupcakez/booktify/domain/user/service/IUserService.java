@@ -1,5 +1,7 @@
 package id.my.cupcakez.booktify.domain.user.service;
 
+import id.my.cupcakez.booktify.domain.rent.repository.RentQueryFilter;
+import id.my.cupcakez.booktify.domain.user.repository.UserQueryFilter;
 import id.my.cupcakez.booktify.dto.request.UpdateUserProfileRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateUserRequest;
 import id.my.cupcakez.booktify.dto.response.UserRentResponse;
@@ -12,11 +14,11 @@ import java.util.UUID;
 public interface IUserService {
     UserResponse updateUser(UUID userId, UpdateUserRequest updateUserRequest);
 
-    UserResponse getUserById(UUID userId);
+    UserResponse findUserById(UUID userId);
 
-    Page<UserRentResponse> getUserRents(UUID userId, Pageable pageable);
+    Page<UserRentResponse> findUserRents(UUID userId, RentQueryFilter rentQueryFilter);
 
-    Page<UserResponse> getUsers(Pageable pageable);
+    Page<UserResponse> findUsers(UserQueryFilter userQueryFilter);
 
     UserResponse updateUserProfile(UUID userId, UpdateUserProfileRequest updateUserProfileRequest);
 }

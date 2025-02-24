@@ -66,4 +66,3 @@ public class RentEntity implements Serializable {
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

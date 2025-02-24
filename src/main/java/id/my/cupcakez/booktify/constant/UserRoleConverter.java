@@ -2,13 +2,14 @@ package id.my.cupcakez.booktify.constant;
 
 import id.my.cupcakez.booktify.exception.CustomException;
 import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-@Converter(autoApply = true)
-public class UserRoleConverter implements AttributeConverter<UserRole, Integer> {
+@Component
+public class UserRoleConverter implements AttributeConverter<UserRole, Integer>, Converter<String, UserRole> {
     @Override
     public Integer convertToDatabaseColumn(UserRole role) {
         return role.ordinal();
@@ -22,6 +23,11 @@ public class UserRoleConverter implements AttributeConverter<UserRole, Integer> 
                 .orElseThrow(
                         () -> new CustomException(String.format("%d unknown user role, failed to convert into user role", dbData), HttpStatus.BAD_REQUEST)
                 );
+    }
+
+    @Override
+    public UserRole convert(String source) {
+        return UserRole.fromValue(source);
     }
 }
 

@@ -1,4 +1,5 @@
 package id.my.cupcakez.booktify.domain.book.service;
+import id.my.cupcakez.booktify.domain.book.repository.BookQueryFilter;
 import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
@@ -50,7 +51,7 @@ public class BookService implements IBookService {
 
     @Override
     @Cacheable(value = "book", key = "'book-' + #id")
-    public BookResponse getBookById(Long id) {
+    public BookResponse findBookById(Long id) {
         return bookRepository.findById(id)
                 .map(b -> {
                     logger.info("book with id {} successfully found", b.getId());
@@ -60,15 +61,21 @@ public class BookService implements IBookService {
     }
 
     @Override
-    @Cacheable(value = "books", key = "'books-' + #pageable + '-' + #keyword")
-    public Page<BookResponse> getBooks(String keyword, Pageable pageable) {
-        Page<BookResponse> bookResponse = bookRepository.findAllByKeywords(keyword, pageable).map(bookMapper::toBookResponse);
-        logger.info("books for pages {} , size {}, sort {}, keyword {} successfully found", pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort(), keyword);
+    @Cacheable(value = "books", key = "'books-' + #bookQueryFilter")
+    public Page<BookResponse> findBooks(BookQueryFilter bookQueryFilter) {
+        Page<BookResponse> bookResponse = bookRepository.findAll(bookQueryFilter.getKeyword(), bookQueryFilter.getPageable()).map(bookMapper::toBookResponse);
+        logger.info("Users for pages {} , size {}, sort {}, keyword {} successfully found",
+                bookQueryFilter.getPageable().getPageNumber(),
+                bookQueryFilter.getPageable().getPageSize(),
+                bookQueryFilter.getPageable().getSort(),
+                bookQueryFilter.getKeyword()
+        );
         return bookResponse;
     }
 
     @Override
     @CachePut(value = "book", key = "'book-' + #id")
+    @CacheEvict(value = "books", allEntries = true)
     public BookResponse updateBook(Long id, UpdateBookRequest updateBookRequest) {
         return bookRepository.findById(id).map(b -> {
             Optional.ofNullable(updateBookRequest.getTitle()).ifPresent(b::setTitle);
