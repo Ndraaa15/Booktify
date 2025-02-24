@@ -60,10 +60,10 @@ public class BookService implements IBookService {
     }
 
     @Override
-    @Cacheable(value = "books", key = "'books-' + #pageable")
+    @Cacheable(value = "books", key = "'books-' + #pageable + '-' + #keyword")
     public Page<BookResponse> getBooks(String keyword, Pageable pageable) {
         Page<BookResponse> bookResponse = bookRepository.findAllByKeywords(keyword, pageable).map(bookMapper::toBookResponse);
-        logger.info("books for pages {} , size {}, sort {} successfully found", pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        logger.info("books for pages {} , size {}, sort {}, keyword {} successfully found", pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort(), keyword);
         return bookResponse;
     }
 

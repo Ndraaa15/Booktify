@@ -16,21 +16,22 @@ import java.util.UUID;
 @Entity
 @Table( name = "sessions",
         indexes = {
-            @Index(columnList = "session_id")
+            @Index(columnList = "id")
 })
 public class SessionEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false, name = "id")
     private UUID sessionId;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserEntity user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "refresh_token")
     private String refreshToken;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, name = "created_at")
     private LocalDateTime createdAt;
 }

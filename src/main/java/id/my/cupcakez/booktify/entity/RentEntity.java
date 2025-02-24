@@ -35,6 +35,7 @@ public class RentEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rent_id_seq")
     @SequenceGenerator(name = "rent_id_seq", sequenceName = "rent_id_seq", allocationSize = 1)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,22 +48,22 @@ public class RentEntity implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private BookEntity book;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "quantity")
     private Integer quantity;
 
     @Convert(converter = StatusRentConverter.class)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "status")
     private StatusRent status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "rented_until")
     private LocalDate rentedUntil;
 
     @CreationTimestamp
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 }
 

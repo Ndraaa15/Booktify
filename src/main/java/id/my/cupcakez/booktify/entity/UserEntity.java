@@ -34,32 +34,33 @@ import java.util.UUID;
 public class UserEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false, name = "id")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "name")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "password")
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "email")
     private String email;
 
     @Convert(converter = UserRoleConverter.class)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "role")
     private UserRole role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "address")
     private String address;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "phone")
     private String phone;
 
     @CreationTimestamp
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 }

@@ -30,7 +30,6 @@
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<org.projectlombok.version>1.18.36</org.projectlombok.version>
-		<aws.sdk.version>2.23.10</aws.sdk.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -165,9 +164,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>${aws.sdk.version}</version>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.470</version>
 		</dependency>
 	</dependencies>
 	<build>

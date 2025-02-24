@@ -78,7 +78,7 @@ public class BookController {
             @RequestParam(value = "keyword", required = false, defaultValue = "")
             String keyword,
             @ParameterObject
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+            @PageableDefault(sort = "created_at", direction = Sort.Direction.ASC)
             Pageable pageable
     ) {
         Page<BookResponse> books = bookService.getBooks(keyword, pageable);
