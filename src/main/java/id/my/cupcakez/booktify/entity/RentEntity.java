@@ -28,7 +28,6 @@ import java.util.UUID;
 @Entity
 @Table( name = "rents",
         indexes = {
-                @Index(columnList = "id"),
                 @Index(columnList = "user_id"),
                 @Index(columnList = "book_id")
 })

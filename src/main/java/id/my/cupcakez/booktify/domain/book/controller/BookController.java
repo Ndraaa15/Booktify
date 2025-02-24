@@ -6,6 +6,7 @@ import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
 import id.my.cupcakez.booktify.entity.BookEntity;
+import id.my.cupcakez.booktify.response.ResponseWrapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,67 +46,61 @@ public class BookController {
 
     @PostMapping("")
     @PreAuthorize("hasAnyAuthority('STAFF', 'ADMIN')")
-    public ResponseEntity<?> createBook(
+    public ResponseEntity<ResponseWrapper<BookResponse>> createBook(
             @Validated
             @RequestBody
             CreateBookRequest createBookRequest
     ) {
         BookResponse bookResponse = bookService.createBook(createBookRequest);
-
-        Map<String, Object> response = Map.of(
-                "message", "Book created successfully",
-                "book", bookResponse
-        );
-
+        ResponseWrapper<BookResponse> response = ResponseWrapper.<BookResponse>builder()
+                .message("book created successfully")
+                .data(bookResponse)
+                .build();
         return ResponseEntity.created(URI.create("/api/v1/books")).body(response);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('STAFF', 'USER', 'ADMIN')")
-    public ResponseEntity<?> getBook(
+    public ResponseEntity<ResponseWrapper<BookResponse>> getBook(
             @PathVariable("id") Long id
     ) {
         BookResponse bookResponse = bookService.getBookById(id);
-
-        Map<String, Object> response = Map.of(
-                "message", "Book retrieved successfully",
-                "book", bookResponse
-        );
-
+        ResponseWrapper<BookResponse> response = ResponseWrapper.<BookResponse>builder()
+                .message("book retrieved successfully")
+                .data(bookResponse)
+                .build();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('STAFF', 'USER', 'ADMIN')")
-    public ResponseEntity<?> getBooks(
-            @QuerydslPredicate(root = BookEntity.class, bindings = IBookRepository.class)
-            Predicate predicate,
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    public ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> getBooks(
+            @RequestParam(value = "keyword", required = false, defaultValue = "")
+            String keyword,
             @ParameterObject
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
             Pageable pageable
     ) {
-        Page<BookResponse> books = bookService.getBooks(predicate, pageable);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Books retrieved successfully",
-                "books", new PagedModel<>(books)
-        ));
+        Page<BookResponse> books = bookService.getBooks(keyword, pageable);
+        ResponseWrapper<PagedModel<BookResponse>> response = ResponseWrapper.<PagedModel<BookResponse>>builder()
+                .message("books retrieved successfully")
+                .data(new PagedModel<>(books)).build();
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
-    public ResponseEntity<?> updateBook(
+    public ResponseEntity<ResponseWrapper<BookResponse>> updateBook(
             @PathVariable("id") Long id,
             @Validated
             @RequestBody
             UpdateBookRequest updateBookRequest
     ) {
         BookResponse bookResponse = bookService.updateBook(id, updateBookRequest);
-
-        Map<String, Object> response = Map.of(
-                "message", "Book updated successfully",
-                "book", bookResponse
-        );
-
+        ResponseWrapper<BookResponse> response = ResponseWrapper.<BookResponse>builder()
+                .message("book updated successfully")
+                .data(bookResponse)
+                .build();
         return ResponseEntity.ok(response);
     }
 

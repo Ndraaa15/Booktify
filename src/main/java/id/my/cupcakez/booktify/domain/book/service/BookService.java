@@ -14,10 +14,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import com.querydsl.core.types.Predicate;
 
 import java.util.Optional;
 
@@ -27,13 +25,11 @@ public class BookService implements IBookService {
     private IBookMapper bookMapper;
     private static final Logger logger = LogManager.getLogger(BookService.class);
 
-
     @Autowired
     public BookService(IBookRepository bookRepository, IBookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
     }
-
 
     @Override
     @CacheEvict(value = "books", allEntries = true)
@@ -45,10 +41,9 @@ public class BookService implements IBookService {
                 .image(createBookRequest.getImage())
                 .stock(createBookRequest.getStock())
                 .build();
-
         BookEntity book = bookRepository.save(bookEntity);
 
-        logger.debug("Book created: {}", book);
+        logger.info("book with id {} successfully created", book.getId());
 
         return bookMapper.toBookResponse(book);
     }
@@ -58,17 +53,17 @@ public class BookService implements IBookService {
     public BookResponse getBookById(Long id) {
         return bookRepository.findById(id)
                 .map(b -> {
-                    logger.info("Book found: {}", b);
+                    logger.info("book with id {} successfully found", b.getId());
                     return bookMapper.toBookResponse(b);
                 })
                 .orElseThrow(() -> new CustomException("Book not found", HttpStatus.NOT_FOUND));
     }
 
     @Override
-    @Cacheable(value = "books", key = "'books-page-' + #pageable.pageNumber")
-    public Page<BookResponse> getBooks(Predicate predicate, Pageable pageable) {
-        Page<BookResponse> bookResponse = bookRepository.findAll(predicate, pageable).map(bookMapper::toBookResponse);
-        logger.debug("Books found: {}", new PagedModel<>(bookResponse).getContent());
+    @Cacheable(value = "books", key = "'books-' + #pageable")
+    public Page<BookResponse> getBooks(String keyword, Pageable pageable) {
+        Page<BookResponse> bookResponse = bookRepository.findAllByKeywords(keyword, pageable).map(bookMapper::toBookResponse);
+        logger.info("books for pages {} , size {}, sort {} successfully found", pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
         return bookResponse;
     }
 
@@ -84,11 +79,11 @@ public class BookService implements IBookService {
 
             BookEntity bookSaved = bookRepository.save(b);
 
-            logger.debug("Book updated: {}", bookSaved);
+            logger.info("book with id {} successfully updated", bookSaved.getId());
 
             return bookMapper.toBookResponse(bookSaved);
         }).orElseThrow(
-                () -> new CustomException("Book not found", HttpStatus.NOT_FOUND)
+                () -> new CustomException(String.format("book with id %d not found", id), HttpStatus.NOT_FOUND)
         );
     }
 
@@ -96,6 +91,6 @@ public class BookService implements IBookService {
     @CacheEvict(value = "book", key = "'book-' + #id")
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
-        logger.debug("Book deleted: {}", id);
+        logger.info("book with id {} successfully deleted", id);
     }
 }

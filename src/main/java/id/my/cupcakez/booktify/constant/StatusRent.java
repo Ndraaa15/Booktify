@@ -6,11 +6,13 @@ import id.my.cupcakez.booktify.exception.CustomException;
 import org.springframework.http.HttpStatus;
 
 public enum StatusRent {
+    UNKNOWN ("unknown"),
     PENDING ("pending"),
     ACCEPTED ("accepted"),
     REJECTED ("rejected"),
     ON_RENT ("on-rent"),
-    RETURNED ("returned");
+    RETURNED ("returned"),
+    OVERDUE ("overdue");
 
     private final String statusRent;
 
@@ -29,9 +31,9 @@ public enum StatusRent {
             String statusRentType = statusRent.getStatusRentType();
             if (statusRentType.equals(value)) {
                 return statusRent;
-            }
+            }   
         }
 
-        throw new CustomException("Invalid value for StatusRent type Enum: " + value,  HttpStatus.BAD_REQUEST);
+        throw new CustomException(String.format("%s status rent enum, it's must be either pending, accepted, rejected, on-rent, returned, overdue", UNKNOWN.getStatusRentType()),  HttpStatus.BAD_REQUEST);
     }
 }

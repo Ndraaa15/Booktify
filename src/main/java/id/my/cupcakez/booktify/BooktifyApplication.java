@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 
@@ -21,6 +22,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 		)
 )
 @EnableCaching
+@EnableScheduling
 public class BooktifyApplication {
 
 	public static void main(String[] args) {

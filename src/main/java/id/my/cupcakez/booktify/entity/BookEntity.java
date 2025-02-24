@@ -6,24 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.redis.core.RedisHash;
-
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
-@Table( name = "books",
-        indexes = {
-                @Index(columnList = "id"),
-                @Index(columnList = "title"),
-                @Index(columnList = "author")
-})
+@Table( name = "books")
 public class BookEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_id_seq")
@@ -52,4 +46,8 @@ public class BookEntity implements Serializable {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "tsv", insertable = false, updatable = false, columnDefinition = "tsvector")
+    private String bookFts;
+
 }

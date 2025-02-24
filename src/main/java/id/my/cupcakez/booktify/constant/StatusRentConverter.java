@@ -8,21 +8,16 @@ public class StatusRentConverter implements AttributeConverter<StatusRent, Integ
 
     @Override
     public Integer convertToDatabaseColumn(StatusRent status) {
-        if (status == null) {
-            return null;
-        }
         return status.ordinal();
     }
 
     @Override
     public StatusRent convertToEntityAttribute(Integer dbData) {
-        if (dbData == null) {
-            return null;
-        }
-
         return Stream.of(StatusRent.values())
                 .filter(role -> role.ordinal() == dbData)
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(
+                        () -> new IllegalArgumentException(String.format("%d unknown status rent, failed to convert into status rent", dbData))
+                );
     }
 }

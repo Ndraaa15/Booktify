@@ -6,6 +6,7 @@ import id.my.cupcakez.booktify.exception.CustomException;
 import org.springframework.http.HttpStatus;
 
 public enum UserRole {
+    UNKNOWN ("unknown"),
     ADMIN ("admin"),
     STAFF ("staff"),
     USER ("user");
@@ -17,19 +18,18 @@ public enum UserRole {
     }
 
     @JsonValue
-    public String getUserRoleType() {
+    public String getUserRole() {
         return userRole;
     }
 
     @JsonCreator
     public static UserRole fromValue(String value) {
         for (UserRole userRole : values()) {
-            String userRoleType = userRole.getUserRoleType();
+            String userRoleType = userRole.getUserRole();
             if (userRoleType.equals(value)) {
                 return userRole;
             }
         }
-
-        throw new CustomException("Invalid value for UserRole type Enum: " + value, HttpStatus.BAD_REQUEST);
+        throw new CustomException(String.format("%s status user role, it's must be either pending, accepted, rejected, on-rent, returned, overdue", UNKNOWN.getUserRole()) + value, HttpStatus.BAD_REQUEST);
     }
 }

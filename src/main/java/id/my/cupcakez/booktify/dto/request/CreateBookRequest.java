@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.io.Serializable;
 
@@ -32,6 +33,7 @@ public class CreateBookRequest implements Serializable {
     private String description;
 
     @JsonProperty("image")
+    @URL
     @Schema(description = "Book image", example = "https://example.com/image.jpg")
     @NotBlank(message = "image must not be blank")
     private String image;

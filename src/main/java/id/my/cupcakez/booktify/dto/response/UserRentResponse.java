@@ -1,5 +1,6 @@
 package id.my.cupcakez.booktify.dto.response;
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,21 +13,20 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RentResponse implements Serializable {
+public class UserRentResponse implements Serializable {
     @JsonProperty("id")
     @Schema(description = "Rent ID", example = "1")
     private Long id;
 
-    @JsonProperty("user")
-    private UserResponse user;
-
     @JsonProperty("book")
+    @Schema(description = "Book data")
     private BookResponse book;
 
     @JsonProperty("quantity")

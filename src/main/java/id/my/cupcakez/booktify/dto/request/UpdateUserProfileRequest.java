@@ -11,11 +11,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UpdateUserRequest implements Serializable {
+public class UpdateUserProfileRequest implements Serializable{
     @JsonProperty("name")
     @Schema(description = "User name", example = "John Doe")
     private String name;
@@ -37,10 +38,6 @@ public class UpdateUserRequest implements Serializable {
     @Pattern(regexp = "^\\+62\\d{9,13}$", message = "Phone must start with +62 and contain 9-13 digits")
     @Schema(description = "User phone", example = "+6281234567890")
     private String phone;
-
-    @JsonProperty("role")
-    @Schema(description = "User role", example = "admin")
-    private UserRole role;
 
     @JsonProperty("address")
     @Schema(description = "User address", example = "Jl. Raya Badung")

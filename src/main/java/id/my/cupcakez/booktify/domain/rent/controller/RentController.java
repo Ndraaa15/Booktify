@@ -4,12 +4,15 @@ import id.my.cupcakez.booktify.domain.rent.service.IRentService;
 import id.my.cupcakez.booktify.dto.request.CreateRentRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateRentRequest;
 import id.my.cupcakez.booktify.dto.response.RentResponse;
+import id.my.cupcakez.booktify.response.ResponseWrapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.SecurityMarker;
@@ -34,54 +37,60 @@ public class RentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createRent(@Validated @RequestBody CreateRentRequest createRentRequest){
+    public ResponseEntity<ResponseWrapper<RentResponse>> createRent(
+            @Validated
+            @RequestBody
+            CreateRentRequest createRentRequest
+    ){
         UUID userId = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-
         RentResponse rentResponse = rentService.createRent(userId, createRentRequest);
-
-        Map<String, Object> response = Map.of(
-                "message", "Rent created successfully",
-                "rent", rentResponse
+        ResponseWrapper<RentResponse> response = new ResponseWrapper<>(
+                "Rent created successfully",
+                rentResponse
         );
-
         return ResponseEntity.created(URI.create("/api/v1/rents")).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRentById(@PathVariable Long id){
-
+    public ResponseEntity<ResponseWrapper<RentResponse>> getRentById(
+            @PathVariable("id")
+            Long id
+    ){
         RentResponse rentResponse = rentService.getRentById(id);
-
-        Map<String, Object> response = Map.of(
-                "message", "Rent returned successfully",
-                "rent", rentResponse
+        ResponseWrapper<RentResponse> response = new ResponseWrapper<>(
+                "Rent found successfully",
+                rentResponse
         );
-
-
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateRent(@PathVariable Long id, @Validated @RequestBody UpdateRentRequest updateRentRequest){
+    public ResponseEntity<ResponseWrapper<RentResponse>> updateRent(
+            @PathVariable("id")
+            Long id,
+            @Validated
+            @RequestBody
+            UpdateRentRequest updateRentRequest
+    ){
         RentResponse rentResponse = rentService.updateRent(id, updateRentRequest);
-
-        Map<String, Object> response = Map.of(
-                "message", "Rent updated successfully",
-                "rent", rentResponse
+        ResponseWrapper<RentResponse> response = new ResponseWrapper<>(
+                "Rent updated successfully",
+                rentResponse
         );
-
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getRent(@ParameterObject Pageable pageable){
+    public ResponseEntity<ResponseWrapper<PagedModel<RentResponse>>> getRent(
+            @ParameterObject
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+            Pageable pageable
+    ){
         Page<RentResponse> rents = rentService.getRents(pageable);
-
-        Map<String, Object> response = Map.of(
-                "message", "Rents retrieved successfully",
-                "rents", new PagedModel<>(rents)
-        );
-
+        ResponseWrapper<PagedModel<RentResponse>> response = ResponseWrapper.<PagedModel<RentResponse>>builder()
+                .message("rents retrieved successfully")
+                .data(new PagedModel<>(rents))
+                .build();
         return ResponseEntity.ok(response);
     }
 }

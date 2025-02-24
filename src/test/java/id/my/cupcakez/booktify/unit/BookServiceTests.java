@@ -1,12 +1,8 @@
 package id.my.cupcakez.booktify.unit;
 
-import com.querydsl.core.types.Operator;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.PredicateOperation;
-import com.querydsl.core.types.PredicateTemplate;
 import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
 import id.my.cupcakez.booktify.domain.book.service.BookService;
-import id.my.cupcakez.booktify.domain.book.service.IBookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
@@ -23,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,18 +131,18 @@ public class BookServiceTests {
     public void testGetBooks(){
         // given
         Page<BookEntity> bookEntities = new PageImpl<>(List.of(dataEntity));
-        Predicate predicate = null;
-        given(bookRepository.findAll(predicate ,Pageable.unpaged())).willReturn(bookEntities);
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
+        given(bookRepository.findAllByKeywords("", pageable)).willReturn(bookEntities);
 
         // when
-        Page<BookResponse> bookResponses = bookService.getBooks(predicate, Pageable.unpaged());
+        Page<BookResponse> bookResponses = bookService.getBooks("", Pageable.unpaged());
 
         // then
         assertThat(bookResponses).isNotNull();
         assertThat(bookResponses.getContent()).hasSize(1);
         assertThat(bookResponses.getContent().get(0)).usingRecursiveComparison().isEqualTo(dataCreateResponse);
 
-        verify(bookRepository, times(1)).findAll(predicate, Pageable.unpaged());
+        verify(bookRepository, times(1)).findAllByKeywords("", Pageable.unpaged());
         verify(bookMapper, times(1)).toBookResponse(any(BookEntity.class));
     }
 

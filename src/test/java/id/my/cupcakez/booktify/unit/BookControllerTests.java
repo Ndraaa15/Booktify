@@ -2,39 +2,41 @@ package id.my.cupcakez.booktify.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.my.cupcakez.booktify.domain.book.controller.BookController;
-import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
 import id.my.cupcakez.booktify.domain.book.service.BookService;
-import id.my.cupcakez.booktify.domain.book.service.IBookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
+import id.my.cupcakez.booktify.response.ResponseWrapper;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.List;
+
 import static org.mockito.BDDMockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
-@AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(BookController.class)
+@ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-//@ContextConfiguration(classes = {BookController.class, IBookRepository.class, IBookService.class})
 public class BookControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private BookService bookService;
+
+    @InjectMocks
+    private BookController bookController;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -51,7 +53,7 @@ public class BookControllerTests {
                 .author("F. Scott Fitzgerald")
                 .description("The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald.")
                 .stock(10)
-                .image("the-great-gatsby.jpg")
+                .image("http://example.com/the-great-gatsby.jpg")
                 .build();
 
         dataUpdateRequest = UpdateBookRequest.builder()
@@ -59,7 +61,7 @@ public class BookControllerTests {
                 .author("F. Scott Fitzgerald")
                 .description("The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald.")
                 .stock(20)
-                .image("the-great-gatsby.jpg")
+                .image("http://example.com/the-great-gatsby.jpg")
                 .build();
 
 
@@ -69,7 +71,7 @@ public class BookControllerTests {
                 .author("F. Scott Fitzgerald")
                 .description("The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald.")
                 .stock(10)
-                .image("the-great-gatsby.jpg")
+                .image("http://example.com/the-great-gatsby.jpg")
                 .build();
 
         dataUpdateResponse = BookResponse.builder()
@@ -78,7 +80,7 @@ public class BookControllerTests {
                 .author("F. Scott Fitzgerald")
                 .description("The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald.")
                 .stock(20)
-                .image("the-great-gatsby.jpg")
+                .image("http://example.com/the-great-gatsby.jpg")
                 .build();
     }
 
@@ -89,26 +91,22 @@ public class BookControllerTests {
         // given
         given(bookService.createBook(any(CreateBookRequest.class))).willReturn(dataResponse);
 
+        // when
+        ResponseEntity<ResponseWrapper<BookResponse>> bookResponse =bookController.createBook(dataCreateRequest);
+
         // then
-        String bookJson = objectMapper.writeValueAsString(dataCreateRequest);
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/v1/books")
-                        .contentType("application/json")
-                        .content(bookJson)
-        ).andDo(
-                print()
-        ).andExpect(
-                MockMvcResultMatchers.status().isCreated()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.title").value(dataResponse.getTitle())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.author").value(dataResponse.getAuthor())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.description").value(dataResponse.getDescription())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.image").value(dataResponse.getImage())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.stock").value(dataResponse.getStock())
+        assertThat(bookResponse.getBody().getData()).extracting(
+                BookResponse::getTitle,
+                BookResponse::getAuthor,
+                BookResponse::getDescription,
+                BookResponse::getImage,
+                BookResponse::getStock
+        ).contains(
+                dataResponse.getTitle(),
+                dataResponse.getAuthor(),
+                dataResponse.getDescription(),
+                dataResponse.getImage(),
+                dataResponse.getStock()
         );
 
         verify(bookService, times(1)).createBook(any(CreateBookRequest.class));
@@ -119,29 +117,30 @@ public class BookControllerTests {
     @Order(2)
     public void testGetBooks() throws Exception {
         // given
-        Page<BookResponse> bookResponses = new PageImpl<>(List.of(dataResponse));
-        given(bookService.getBooks(any(), any())).willReturn(bookResponses);
+        Page<BookResponse> bookMockResponses = new PageImpl<>(List.of(dataResponse));
+        given(bookService.getBooks("", any())).willReturn(bookMockResponses);
+
+        // when
+        ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> bookResponses = bookController.getBooks("", Pageable.unpaged());
 
         // then
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/v1/books")
-        ).andDo(
-                print()
-        ).andExpect(
-                MockMvcResultMatchers.status().isOk()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.books.content[0].title").value(dataResponse.getTitle())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.books.content[0].author").value(dataResponse.getAuthor())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.books.content[0].description").value(dataResponse.getDescription())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.books.content[0].image").value(dataResponse.getImage())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.books.content[0].stock").value(dataResponse.getStock())
+        assertThat(bookResponses.getBody().getData().getContent()).hasSize(1);
+        assertThat(bookResponses.getBody().getData().getContent().get(0)).extracting(
+                BookResponse::getTitle,
+                BookResponse::getAuthor,
+                BookResponse::getDescription,
+                BookResponse::getImage,
+                BookResponse::getStock
+        ).contains(
+                dataResponse.getTitle(),
+                dataResponse.getAuthor(),
+                dataResponse.getDescription(),
+                dataResponse.getImage(),
+                dataResponse.getStock()
         );
 
-        verify(bookService, times(1)).getBooks(any(), any());
+
+        verify(bookService, times(1)).getBooks("", any());
     }
 
     @Test
@@ -151,23 +150,22 @@ public class BookControllerTests {
         // given
         given(bookService.getBookById(1L)).willReturn(dataResponse);
 
+        // when
+        ResponseEntity<ResponseWrapper<BookResponse>> bookResponse = bookController.getBook(1L);
+
         // then
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/v1/books/1")
-        ).andDo(
-                print()
-        ).andExpect(
-                MockMvcResultMatchers.status().isOk()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.title").value(dataResponse.getTitle())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.author").value(dataResponse.getAuthor())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.description").value(dataResponse.getDescription())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.image").value(dataResponse.getImage())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.stock").value(dataResponse.getStock())
+        assertThat(bookResponse.getBody().getData()).extracting(
+                BookResponse::getTitle,
+                BookResponse::getAuthor,
+                BookResponse::getDescription,
+                BookResponse::getImage,
+                BookResponse::getStock
+        ).contains(
+                dataResponse.getTitle(),
+                dataResponse.getAuthor(),
+                dataResponse.getDescription(),
+                dataResponse.getImage(),
+                dataResponse.getStock()
         );
 
         verify(bookService, times(1)).getBookById(1L);
@@ -180,26 +178,22 @@ public class BookControllerTests {
         // given
         given(bookService.updateBook(1L, dataUpdateRequest)).willReturn(dataUpdateResponse);
 
+        // when
+        ResponseEntity<ResponseWrapper<BookResponse>> bookResponse = bookController.updateBook(1L, dataUpdateRequest);
+
         // then
-        String bookJson = objectMapper.writeValueAsString(dataUpdateRequest);
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/api/v1/books/1")
-                        .contentType("application/json")
-                        .content(bookJson)
-        ).andDo(
-                print()
-        ).andExpect(
-                MockMvcResultMatchers.status().isOk()
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.title").value(dataUpdateResponse.getTitle())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.author").value(dataUpdateResponse.getAuthor())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.description").value(dataUpdateResponse.getDescription())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.image").value(dataUpdateResponse.getImage())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.book.stock").value(dataUpdateResponse.getStock())
+        assertThat(bookResponse.getBody().getData()).extracting(
+                BookResponse::getTitle,
+                BookResponse::getAuthor,
+                BookResponse::getDescription,
+                BookResponse::getImage,
+                BookResponse::getStock
+        ).contains(
+                dataUpdateResponse.getTitle(),
+                dataUpdateResponse.getAuthor(),
+                dataUpdateResponse.getDescription(),
+                dataUpdateResponse.getImage(),
+                dataUpdateResponse.getStock()
         );
 
         verify(bookService, times(1)).updateBook(1L, dataUpdateRequest);
@@ -209,14 +203,14 @@ public class BookControllerTests {
     @DisplayName("Test 5:Delete Book Test")
     @Order(5)
     public void testDeleteBook() throws Exception {
+        // given
+        doNothing().when(bookService).deleteBook(1L);
+
+        // when
+        ResponseEntity<?> bookResponse = bookController.deleteBook(1L);
+
         // then
-        mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/v1/books/1")
-        ).andDo(
-                print()
-        ).andExpect(
-                MockMvcResultMatchers.status().isNoContent()
-        );
+        assertThat(bookResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         verify(bookService, times(1)).deleteBook(1L);
     }

@@ -14,6 +14,5 @@ public interface IRentMapper {
     RentResponse toRentResponse(RentEntity rentEntity);
 
     @Named("toRentResponseWithoutUser")
-    @Mapping(target = "user", source = "user",ignore = true)
     RentResponse toRentResponseWithoutUser(RentEntity rentEntity);
 }

@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.util.*;
+
 @Component
 public class Jwt implements IJwt {
     @Value("${jwt.secret}")
