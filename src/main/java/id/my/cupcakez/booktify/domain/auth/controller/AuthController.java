@@ -68,8 +68,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'STAFF')")
-    public ResponseEntity<?> logout(HttpSession session) {
+    public ResponseEntity<ResponseWrapper<String>> logout(HttpSession session) {
         session.invalidate();
         ResponseWrapper<String> response = ResponseWrapper.<String>builder()
                 .message("logout success")
@@ -79,7 +78,6 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'STAFF')")
     public ResponseEntity<?> refresh() {
         return ResponseEntity.ok().build();
     }

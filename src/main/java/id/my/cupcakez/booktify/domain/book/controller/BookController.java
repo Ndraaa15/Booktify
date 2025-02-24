@@ -45,7 +45,6 @@ public class BookController {
     }
 
     @PostMapping("")
-    @PreAuthorize("hasAnyAuthority('STAFF', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<BookResponse>> createBook(
             @Validated
             @RequestBody
@@ -60,7 +59,6 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'USER', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<BookResponse>> getBook(
             @PathVariable("id") Long id
     ) {
@@ -73,7 +71,6 @@ public class BookController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> getBooks(
             @RequestParam(value = "keyword", required = false, defaultValue = "")
             String keyword,
@@ -89,7 +86,6 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<BookResponse>> updateBook(
             @PathVariable("id") Long id,
             @Validated
@@ -105,7 +101,6 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ResponseEntity<?> deleteBook(
             @PathVariable("id") Long id
     ) {

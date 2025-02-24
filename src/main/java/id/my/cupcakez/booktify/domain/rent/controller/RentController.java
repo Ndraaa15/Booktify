@@ -83,7 +83,7 @@ public class RentController {
     @GetMapping("")
     public ResponseEntity<ResponseWrapper<PagedModel<RentResponse>>> getRent(
             @ParameterObject
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+            @PageableDefault(sort = "created_at", direction = Sort.Direction.ASC)
             Pageable pageable
     ){
         Page<RentResponse> rents = rentService.getRents(pageable);

@@ -131,18 +131,18 @@ public class BookServiceTests {
     public void testGetBooks(){
         // given
         Page<BookEntity> bookEntities = new PageImpl<>(List.of(dataEntity));
-        Pageable pageable = Pageable.ofSize(10).withPage(0);
-        given(bookRepository.findAllByKeywords("", pageable)).willReturn(bookEntities);
+        Pageable pageable = Pageable.ofSize(20).withPage(0);
+        given(bookRepository.findAllByKeywords(eq(""), eq(pageable))).willReturn(bookEntities);
 
         // when
-        Page<BookResponse> bookResponses = bookService.getBooks("", Pageable.unpaged());
+        Page<BookResponse> bookResponses = bookService.getBooks("", pageable);
 
         // then
         assertThat(bookResponses).isNotNull();
         assertThat(bookResponses.getContent()).hasSize(1);
         assertThat(bookResponses.getContent().get(0)).usingRecursiveComparison().isEqualTo(dataCreateResponse);
 
-        verify(bookRepository, times(1)).findAllByKeywords("", Pageable.unpaged());
+        verify(bookRepository, times(1)).findAllByKeywords(eq(""), eq(pageable));
         verify(bookMapper, times(1)).toBookResponse(any(BookEntity.class));
     }
 

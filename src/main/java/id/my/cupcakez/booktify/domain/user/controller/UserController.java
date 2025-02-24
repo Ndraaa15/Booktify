@@ -38,7 +38,6 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ResponseWrapper<UserResponse>> updateUser(
             @Validated
             @RequestBody
@@ -80,10 +79,9 @@ public class UserController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<PagedModel<UserResponse>>> getUsers(
             @ParameterObject
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.ASC)
+            @PageableDefault(sort = "created_at", direction = Sort.Direction.ASC)
             Pageable pageable
     ) {
         Page<UserResponse> users = userService.getUsers(pageable);
@@ -94,7 +92,6 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ResponseEntity<ResponseWrapper<UserResponse>> updateUser(
             @PathVariable("id") UUID userId,
             @Validated

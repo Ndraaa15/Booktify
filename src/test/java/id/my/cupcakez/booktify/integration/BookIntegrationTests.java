@@ -54,15 +54,19 @@ public class BookIntegrationTests {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
+    @BeforeAll
+    static void beforeAll() {
+        postgres.start();
+    }
+
     @AfterAll
     static void afterAll() {
         postgres.stop();
     }
 
+
     @BeforeAll
     static void beforeAll(@Autowired IAuthService authService) {
-        postgres.start();
-
         UserRegisterRequest user = UserRegisterRequest.builder()
                 .name("John Doe")
                 .email("testuser@example.com")
@@ -87,10 +91,9 @@ public class BookIntegrationTests {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.flyway.enabled", () -> "false");
     }
-
-
-
 
     @BeforeEach
     public void setup(){

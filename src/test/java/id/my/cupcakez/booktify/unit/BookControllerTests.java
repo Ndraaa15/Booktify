@@ -6,6 +6,7 @@ import id.my.cupcakez.booktify.domain.book.service.BookService;
 import id.my.cupcakez.booktify.dto.request.CreateBookRequest;
 import id.my.cupcakez.booktify.dto.request.UpdateBookRequest;
 import id.my.cupcakez.booktify.dto.response.BookResponse;
+import id.my.cupcakez.booktify.exception.CustomException;
 import id.my.cupcakez.booktify.response.ResponseWrapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -115,10 +119,10 @@ public class BookControllerTests {
     @Test
     @DisplayName("Test 2:Find All Books Test")
     @Order(2)
-    public void testGetBooks() throws Exception {
+    public void testGetBooks() {
         // given
         Page<BookResponse> bookMockResponses = new PageImpl<>(List.of(dataResponse));
-        given(bookService.getBooks("", any())).willReturn(bookMockResponses);
+        given(bookService.getBooks(eq(""), any())).willReturn(bookMockResponses);
 
         // when
         ResponseEntity<ResponseWrapper<PagedModel<BookResponse>>> bookResponses = bookController.getBooks("", Pageable.unpaged());
@@ -140,13 +144,13 @@ public class BookControllerTests {
         );
 
 
-        verify(bookService, times(1)).getBooks("", any());
+        verify(bookService, times(1)).getBooks(eq(""), any());
     }
 
     @Test
     @DisplayName("Test 3:Find Book By Id Test")
     @Order(3)
-    public void testGetBookById() throws Exception {
+    public void testGetBookById() {
         // given
         given(bookService.getBookById(1L)).willReturn(dataResponse);
 
@@ -174,7 +178,7 @@ public class BookControllerTests {
     @Test
     @DisplayName("Test 4:Update Book Test")
     @Order(4)
-    public void testUpdateBook() throws Exception {
+    public void testUpdateBook() {
         // given
         given(bookService.updateBook(1L, dataUpdateRequest)).willReturn(dataUpdateResponse);
 
@@ -202,7 +206,7 @@ public class BookControllerTests {
     @Test
     @DisplayName("Test 5:Delete Book Test")
     @Order(5)
-    public void testDeleteBook() throws Exception {
+    public void testDeleteBook() {
         // given
         doNothing().when(bookService).deleteBook(1L);
 
@@ -213,5 +217,24 @@ public class BookControllerTests {
         assertThat(bookResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         verify(bookService, times(1)).deleteBook(1L);
+    }
+
+    @Test
+    @DisplayName("Test 6:Find Book By Id Not Found Test")
+    @Order(6)
+    public void testGetBookNotFound(){
+        // given
+        given(bookService.getBookById(2L)).willThrow(new CustomException("Book not found", HttpStatus.NOT_FOUND));
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            bookController.getBook(2L);
+        });
+
+        // then
+        assertEquals("Book not found", exception.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(bookService, times(1)).getBookById(2L);
     }
 }

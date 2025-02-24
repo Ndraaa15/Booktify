@@ -6,10 +6,12 @@ import id.my.cupcakez.booktify.dto.response.RentResponse;
 import id.my.cupcakez.booktify.entity.BookEntity;
 import id.my.cupcakez.booktify.entity.RentEntity;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,4 +22,7 @@ public interface IRentRepository extends JpaRepository<RentEntity, Long> {
     @Query("UPDATE RentEntity r SET r.status = :overdue WHERE r.status = :onRent AND r.rentedUntil <= :now")
     @Transactional
     Integer updateOverdueRent(LocalDate now, StatusRent onRent, StatusRent overdue);
+
+    @Query("SELECT r FROM RentEntity r WHERE r.user.name = %:keyword% OR r.user.email = %:keyword% OR r.book.title = %:keyword%")
+    Page<RentEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
 }
