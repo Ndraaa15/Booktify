@@ -30,7 +30,7 @@
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<org.projectlombok.version>1.18.36</org.projectlombok.version>
-		<argLine>-Xmx2048m -Xms1024m</argLine>
+		<gatling.version>3.7.2</gatling.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -136,11 +136,6 @@
 			<classifier>jakarta</classifier>
 			<version>5.0.0</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.jacoco</groupId>-->
-<!--			<artifactId>jacoco-maven-plugin</artifactId>-->
-<!--			<version>0.8.12</version>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -168,6 +163,26 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.12.470</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gatling.highcharts</groupId>
+			<artifactId>gatling-charts-highcharts</artifactId>
+			<version>${gatling.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gatling</groupId>
+			<artifactId>gatling-app</artifactId>
+			<version>${gatling.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gatling</groupId>
+			<artifactId>gatling-recorder</artifactId>
+			<version>${gatling.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>0.15</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -205,18 +220,19 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
-						<id>default-prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
-						<configuration>
-							<includes>
-								<include>id/my/cupcakez/booktify/**</include>
-							</includes>
-						</configuration>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -235,6 +251,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.gatling</groupId>
+				<artifactId>gatling-maven-plugin</artifactId>
+				<version>4.2.9</version>
+				<configuration>
+					<simulationClass></simulationClass>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
