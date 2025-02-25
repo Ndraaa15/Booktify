@@ -1,6 +1,5 @@
 package id.my.cupcakez.booktify.domain.auth.service;
 
-
 import id.my.cupcakez.booktify.constant.UserRole;
 import id.my.cupcakez.booktify.domain.auth.repository.IAuthRepository;
 import id.my.cupcakez.booktify.dto.request.UserLoginRequest;
@@ -19,7 +18,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 import java.util.regex.Pattern;
 

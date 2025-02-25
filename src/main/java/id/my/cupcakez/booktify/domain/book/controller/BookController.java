@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/api/v1/books")
@@ -43,7 +44,7 @@ public class BookController {
     ) {
         BookResponse bookResponse = bookService.createBook(createBookRequest);
         ResponseWrapper<BookResponse> response = ResponseWrapper.<BookResponse>builder()
-                .message("book created successfully")
+                .message("Book created successfully")
                 .data(bookResponse)
                 .build();
         return ResponseEntity.created(URI.create("/api/v1/books")).body(response);
@@ -55,7 +56,7 @@ public class BookController {
     ) {
         BookResponse bookResponse = bookService.findBookById(id);
         ResponseWrapper<BookResponse> response = ResponseWrapper.<BookResponse>builder()
-                .message("book retrieved successfully")
+                .message("Book retrieved successfully")
                 .data(bookResponse)
                 .build();
         return ResponseEntity.ok(response);
@@ -69,8 +70,9 @@ public class BookController {
             @PageableDefault(sort = "created_at", direction = Sort.Direction.ASC)
             Pageable pageable
     ) {
+        String keywordFormatted = Arrays.stream(keyword.split(" ")).map(String::toLowerCase).reduce((a, b) -> a + "|" + b).orElse("");
         BookQueryFilter bookQueryFilter = BookQueryFilter.builder()
-                .keyword(keyword)
+                .keyword(keywordFormatted)
                 .pageable(pageable)
                 .build();
         Page<BookResponse> books = bookService.findBooks(bookQueryFilter);

@@ -5,8 +5,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.MDC;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.UUID;
 
@@ -25,6 +27,11 @@ public class LoggingInterceptor implements HandlerInterceptor {
         MDC.put("requestId", requestId.toString());
         MDC.put("requestUri", request.getRequestURI());
         return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception{
+
     }
 
     @Override

@@ -56,7 +56,7 @@ public class BookEntity implements Serializable {
     @UpdateTimestamp
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
-
+    // Full Text Search
     @Column(name = "tsv", insertable = false, updatable = false, columnDefinition = "tsvector")
     private String tsv;
 }

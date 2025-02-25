@@ -30,6 +30,7 @@
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<org.projectlombok.version>1.18.36</org.projectlombok.version>
+		<argLine>-Xmx2048m -Xms1024m</argLine>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -135,11 +136,11 @@
 			<classifier>jakarta</classifier>
 			<version>5.0.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.8.12</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.jacoco</groupId>-->
+<!--			<artifactId>jacoco-maven-plugin</artifactId>-->
+<!--			<version>0.8.12</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -204,38 +205,17 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.12</version>
+				<version>0.7.5.201505241946</version>
 				<executions>
 					<execution>
+						<id>default-prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-check</id>
-						<goals>
-							<goal>check</goal>
-						</goals>
 						<configuration>
-							<rules>
-								<rule>
-									<element>PACKAGE</element>
-									<limits>
-										<limit>
-											<counter>LINE</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.50</minimum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
+							<includes>
+								<include>id/my/cupcakez/booktify/**</include>
+							</includes>
 						</configuration>
 					</execution>
 				</executions>

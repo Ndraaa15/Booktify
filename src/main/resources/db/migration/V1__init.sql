@@ -1,6 +1,7 @@
 
 -- Create dummy data for users
 INSERT INTO users (
+    id,
     name,
     email,
     role,
@@ -10,6 +11,7 @@ INSERT INTO users (
     created_at,
     updated_at
 ) VALUES (
+    '107c8650-93cd-4e13-b3cf-86c80bede1e5',
     'admin',
     'admin@example.com',
     1,
@@ -19,6 +21,7 @@ INSERT INTO users (
     NOW(),
     NOW()
 ), (
+    '870a4ee5-1097-4329-821b-8fe80a25e5c2',
     'user',
     'user@example.com',
     2,
