@@ -44,3 +44,9 @@ minio.secret.key=
 minio.s3.bucket=
 minio.s3.endpoint=
 minio.s3.region=
+
+# Mail Configuration
+spring.mail.host=
+spring.mail.port=
+spring.mail.username=
+spring.mail.password=

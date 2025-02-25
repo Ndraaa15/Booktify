@@ -2,7 +2,6 @@ package id.my.cupcakez.booktify.domain.rent.service;
 
 import id.my.cupcakez.booktify.constant.StatusRent;
 import id.my.cupcakez.booktify.domain.book.repository.IBookRepository;
-import id.my.cupcakez.booktify.domain.book.service.BookService;
 import id.my.cupcakez.booktify.domain.rent.repository.IRentRepository;
 import id.my.cupcakez.booktify.domain.rent.repository.RentQueryFilter;
 import id.my.cupcakez.booktify.domain.user.repository.IUserRepository;
@@ -13,6 +12,7 @@ import id.my.cupcakez.booktify.entity.BookEntity;
 import id.my.cupcakez.booktify.entity.RentEntity;
 import id.my.cupcakez.booktify.entity.UserEntity;
 import id.my.cupcakez.booktify.exception.CustomException;
+import id.my.cupcakez.booktify.util.mail.Mail;
 import id.my.cupcakez.booktify.util.mapper.IRentMapper;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -35,15 +34,17 @@ public class RentService implements IRentService {
     private IBookRepository bookRepository;
     private IUserRepository userRepository;
     private IRentMapper rentMapper;
+    private Mail mail;
     private static final Logger logger = LogManager.getLogger(RentService.class);
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @Autowired
-    public RentService(IRentRepository rentRepository, IBookRepository bookRepository, IUserRepository userRepository,IRentMapper rentMapper){
+    public RentService(IRentRepository rentRepository, IBookRepository bookRepository, IUserRepository userRepository,IRentMapper rentMapper, Mail mail){
         this.rentRepository = rentRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.rentMapper = rentMapper;
+        this.mail = mail;
     }
 
     @Override
@@ -132,6 +133,17 @@ public class RentService implements IRentService {
         return rentEntity.map(rent -> {
             if (updateRentRequest.getStatus() == rent.getStatus()){
                 throw new CustomException("Status is same", HttpStatus.BAD_REQUEST);
+            }
+
+
+            if (updateRentRequest.getStatus() ==StatusRent.REJECTED){
+                mail.sendSimpleMessage(rent.getUser().getEmail(), "Rent Rejected", "Dear " + rent.getUser().getName() + ",\n\n" +
+                        "Your rent for book " + rent.getBook().getTitle() + " has been rejected.\n\n" +
+                        "Thank you.");
+            } else if (updateRentRequest.getStatus() == StatusRent.ACCEPTED) {
+                mail.sendSimpleMessage(rent.getUser().getEmail(), "Rent Accepted", "Dear " + rent.getUser().getName() + ",\n\n" +
+                        "Your rent for book " + rent.getBook().getTitle() + " has been accepted.\n\n" +
+                        "Thank you.");
             }
 
             if(updateRentRequest.getStatus() == StatusRent.RETURNED || updateRentRequest.getStatus() == StatusRent.REJECTED){
